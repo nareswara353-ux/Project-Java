@@ -60,6 +60,15 @@ public class ProductController {
         return ResponseEntity.ok(responses);
     }
 
+    @GetMapping("/search")
+    public ResponseEntity<List<ProductResponse>> searchProducts(@RequestParam String name) {
+        List<ProductResponse> responses = productService.searchProducts(name)
+                .stream()
+                .map(ProductResponse::fromDomain)
+                .collect(Collectors.toList());
+        return ResponseEntity.ok(responses);
+    }
+
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteProduct(@PathVariable UUID id) {
         productService.deleteProduct(id);
