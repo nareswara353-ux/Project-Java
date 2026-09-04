@@ -10,6 +10,7 @@ public interface ProductRepository {
     Product save(Product product);
     Optional<Product> findById(UUID id);
     List<Product> findAll();
+    List<Product> findByNameContaining(String namePart);
     void deleteById(UUID id);
     boolean existsById(UUID id);
 }
