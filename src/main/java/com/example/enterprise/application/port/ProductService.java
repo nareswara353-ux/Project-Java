@@ -10,6 +10,7 @@ public interface ProductService {
     Product updateProduct(UUID id, String name, double price, int stock);
     Product getProductById(UUID id);
     List<Product> getAllProducts();
+    List<Product> searchProducts(String namePart);
     void deleteProduct(UUID id);
     Product adjustStock(UUID id, int delta);
 }
