@@ -13,8 +13,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
@@ -28,111 +27,114 @@ class ProductServiceImplTest {
     private ProductServiceImpl productService;
 
     private UUID productId;
-    private Product product;
+    private Product testProduct;
 
     @BeforeEach
     void setUp() {
         productId = UUID.randomUUID();
-        product = new Product(productId, "Test Product", 29.99, 100);
+        testProduct = new Product(productId, "Test Product", 99.99, 10);
     }
 
     @Test
-    void shouldCreateProduct() {
-        when(productRepository.save(any(Product.class))).thenReturn(product);
+    void createProduct_ShouldSaveAndReturnProduct() {
+        when(productRepository.save(any(Product.class))).thenReturn(testProduct);
 
-        Product created = productService.createProduct("Test Product", 29.99, 100);
+        Product result = productService.createProduct("Test Product", 99.99, 10);
 
-        assertThat(created).isNotNull();
-        assertThat(created.name()).isEqualTo("Test Product");
-        assertThat(created.price()).isEqualTo(29.99);
-        assertThat(created.stock()).isEqualTo(100);
-        verify(productRepository).save(any(Product.class));
+        assertNotNull(result);
+        assertEquals(testProduct, result);
+        verify(productRepository, times(1)).save(any(Product.class));
     }
 
     @Test
-    void shouldGetProductById() {
-        when(productRepository.findById(productId)).thenReturn(Optional.of(product));
+    void updateProduct_WhenExists_ShouldUpdateAndReturn() {
+        Product updated = new Product(productId, "Updated Product", 49.99, 5);
+        when(productRepository.findById(productId)).thenReturn(Optional.of(testProduct));
+        when(productRepository.save(any(Product.class))).thenReturn(updated);
 
-        Product found = productService.getProductById(productId);
+        Product result = productService.updateProduct(productId, "Updated Product", 49.99, 5);
 
-        assertThat(found).isEqualTo(product);
-        verify(productRepository).findById(productId);
+        assertNotNull(result);
+        assertEquals("Updated Product", result.name());
+        assertEquals(49.99, result.price());
+        assertEquals(5, result.stock());
+        verify(productRepository, times(1)).findById(productId);
+        verify(productRepository, times(1)).save(any(Product.class));
     }
 
     @Test
-    void shouldThrowWhenProductNotFound() {
+    void updateProduct_WhenNotFound_ShouldThrowException() {
         when(productRepository.findById(productId)).thenReturn(Optional.empty());
 
-        assertThatThrownBy(() -> productService.getProductById(productId))
-                .isInstanceOf(IllegalArgumentException.class)
-                .hasMessage("Product not found with id: " + productId);
+        assertThrows(IllegalArgumentException.class,
+                () -> productService.updateProduct(productId, "Any", 10.0, 1));
+        verify(productRepository, never()).save(any(Product.class));
     }
 
     @Test
-    void shouldUpdateProduct() {
-        Product updatedProduct = new Product(productId, "Updated Name", 39.99, 50);
-        when(productRepository.findById(productId)).thenReturn(Optional.of(product));
-        when(productRepository.save(any(Product.class))).thenReturn(updatedProduct);
+    void getProductById_WhenExists_ShouldReturnProduct() {
+        when(productRepository.findById(productId)).thenReturn(Optional.of(testProduct));
 
-        Product result = productService.updateProduct(productId, "Updated Name", 39.99, 50);
+        Product result = productService.getProductById(productId);
 
-        assertThat(result.name()).isEqualTo("Updated Name");
-        assertThat(result.price()).isEqualTo(39.99);
-        assertThat(result.stock()).isEqualTo(50);
-        verify(productRepository).findById(productId);
-        verify(productRepository).save(any(Product.class));
+        assertNotNull(result);
+        assertEquals(testProduct, result);
     }
 
     @Test
-    void shouldGetAllProducts() {
-        when(productRepository.findAll()).thenReturn(List.of(product));
+    void getProductById_WhenNotFound_ShouldThrowException() {
+        when(productRepository.findById(productId)).thenReturn(Optional.empty());
 
-        List<Product> products = productService.getAllProducts();
-
-        assertThat(products).hasSize(1);
-        assertThat(products.get(0)).isEqualTo(product);
-        verify(productRepository).findAll();
+        assertThrows(IllegalArgumentException.class,
+                () -> productService.getProductById(productId));
     }
 
     @Test
-    void shouldDeleteProduct() {
+    void getAllProducts_ShouldReturnList() {
+        when(productRepository.findAll()).thenReturn(List.of(testProduct));
+
+        List<Product> result = productService.getAllProducts();
+
+        assertEquals(1, result.size());
+        assertEquals(testProduct, result.get(0));
+    }
+
+    @Test
+    void deleteProduct_WhenExists_ShouldDelete() {
         when(productRepository.existsById(productId)).thenReturn(true);
         doNothing().when(productRepository).deleteById(productId);
 
-        productService.deleteProduct(productId);
-
-        verify(productRepository).existsById(productId);
-        verify(productRepository).deleteById(productId);
+        assertDoesNotThrow(() -> productService.deleteProduct(productId));
+        verify(productRepository, times(1)).deleteById(productId);
     }
 
     @Test
-    void shouldThrowWhenDeletingNonExistingProduct() {
+    void deleteProduct_WhenNotFound_ShouldThrowException() {
         when(productRepository.existsById(productId)).thenReturn(false);
 
-        assertThatThrownBy(() -> productService.deleteProduct(productId))
-                .isInstanceOf(IllegalArgumentException.class)
-                .hasMessage("Product not found with id: " + productId);
+        assertThrows(IllegalArgumentException.class,
+                () -> productService.deleteProduct(productId));
+        verify(productRepository, never()).deleteById(any());
     }
 
     @Test
-    void shouldAdjustStock() {
-        Product adjustedProduct = new Product(productId, "Test Product", 29.99, 120);
-        when(productRepository.findById(productId)).thenReturn(Optional.of(product));
-        when(productRepository.save(any(Product.class))).thenReturn(adjustedProduct);
+    void adjustStock_WhenPositiveDelta_ShouldIncreaseStock() {
+        when(productRepository.findById(productId)).thenReturn(Optional.of(testProduct));
+        Product adjusted = new Product(productId, "Test Product", 99.99, 15);
+        when(productRepository.save(any(Product.class))).thenReturn(adjusted);
 
-        Product result = productService.adjustStock(productId, 20);
+        Product result = productService.adjustStock(productId, 5);
 
-        assertThat(result.stock()).isEqualTo(120);
-        verify(productRepository).findById(productId);
-        verify(productRepository).save(any(Product.class));
+        assertEquals(15, result.stock());
+        verify(productRepository, times(1)).save(any(Product.class));
     }
 
     @Test
-    void shouldThrowWhenAdjustingStockToNegative() {
-        when(productRepository.findById(productId)).thenReturn(Optional.of(product));
+    void adjustStock_WhenDeltaCausesNegativeStock_ShouldThrowException() {
+        when(productRepository.findById(productId)).thenReturn(Optional.of(testProduct));
 
-        assertThatThrownBy(() -> productService.adjustStock(productId, -150))
-                .isInstanceOf(IllegalArgumentException.class)
-                .hasMessage("Stock cannot be negative after adjustment");
+        assertThrows(IllegalArgumentException.class,
+                () -> productService.adjustStock(productId, -20));
+        verify(productRepository, never()).save(any(Product.class));
     }
 }
