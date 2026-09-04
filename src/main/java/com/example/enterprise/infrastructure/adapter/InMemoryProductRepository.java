@@ -10,6 +10,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Collectors;
 
 @Repository
 public class InMemoryProductRepository implements ProductRepository {
@@ -33,6 +34,17 @@ public class InMemoryProductRepository implements ProductRepository {
     @Override
     public List<Product> findAll() {
         return new ArrayList<>(store.values());
+    }
+
+    @Override
+    public List<Product> findByNameContaining(String namePart) {
+        if (namePart == null || namePart.isBlank()) {
+            return new ArrayList<>(store.values());
+        }
+        String lower = namePart.toLowerCase();
+        return store.values().stream()
+                .filter(p -> p.name().toLowerCase().contains(lower))
+                .collect(Collectors.toList());
     }
 
     @Override
