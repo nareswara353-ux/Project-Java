@@ -1,0 +1,44 @@
+# Compiled output
+target/
+*.class
+
+# IDE files
+.idea/
+*.iml
+*.iws
+*.ipr
+.settings/
+.classpath
+.project
+*.swp
+*~
+
+# Logs
+logs/
+*.log
+
+# OS metadata
+.DS_Store
+Thumbs.db
+
+# Maven
+pom.xml.tag
+pom.xml.releaseBackup
+pom.xml.versionsBackup
+pom.xml.next
+release.properties
+dependency-reduced-pom.xml
+
+# Test reports
+test-output/
+
+# Application generated files
+*.pid
+*.lock
+*.tmp
+
+# Node (if any)
+node_modules/
+
+# Environment variables
+.env
