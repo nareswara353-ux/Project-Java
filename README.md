@@ -117,10 +117,10 @@ Proyek mengikuti **Clean Architecture** dengan **Hexagonal Architecture** patter
 ## Fitur Utama
 
 ### 1. **CRUD Operasi Produk**
-- ✅ **Create**: Membuat produk baru dengan validasi
-- ✅ **Read**: Ambil produk berdasarkan ID atau semua produk
-- ✅ **Update**: Update data produk lengkap
-- ✅ **Delete**: Hapus produk dari sistem
+- **Create**: Membuat produk baru dengan validasi
+- **Read**: Ambil produk berdasarkan ID atau semua produk
+- **Update**: Update data produk lengkap
+- **Delete**: Hapus produk dari sistem
 
 ### 2. **Pencarian Produk**
 - Cari berdasarkan substring nama (case-insensitive)
@@ -783,7 +783,7 @@ Pipeline dijalankan secara otomatis pada:
 
 ---
 
-## ✔️ Validasi & Error Handling
+## Validasi & Error Handling
 
 ### Input Validation
 
