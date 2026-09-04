@@ -8,16 +8,14 @@ public record ProductResponse(
         UUID id,
         String name,
         double price,
-        int stock,
-        boolean available
+        int stock
 ) {
     public static ProductResponse fromDomain(Product product) {
         return new ProductResponse(
                 product.id(),
                 product.name(),
                 product.price(),
-                product.stock(),
-                product.isAvailable()
+                product.stock()
         );
     }
 }
