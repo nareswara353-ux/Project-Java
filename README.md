@@ -1,10 +1,10 @@
-# 🏢 Portfolio Enterprise - Java 21 + Spring Boot 3.4
+# Portfolio Enterprise - Java 21 + Spring Boot 3.4
 
 Proyek portofolio enterprise yang mendemonstrasikan implementasi **Clean Architecture** (Hexagonal Architecture), **SOLID principles**, dan **design patterns** modern. Dibangun dengan Java 21 dan Spring Boot 3.4, dilengkapi dengan CI/CD pipeline menggunakan GitHub Actions.
 
 ---
 
-## 📑 Daftar Isi
+## Daftar Isi
 
 - [Teknologi](#-teknologi)
 - [Arsitektur](#-arsitektur)
@@ -20,7 +20,7 @@ Proyek portofolio enterprise yang mendemonstrasikan implementasi **Clean Archite
 
 ---
 
-## 🚀 Teknologi
+## Teknologi
 
 | Komponen | Versi | Kegunaan |
 |----------|-------|----------|
@@ -43,7 +43,7 @@ Proyek portofolio enterprise yang mendemonstrasikan implementasi **Clean Archite
 
 ---
 
-## 🏗️ Arsitektur
+## Arsitektur
 
 Proyek mengikuti **Clean Architecture** dengan **Hexagonal Architecture** pattern - memisahkan business logic dari framework dependencies.
 
@@ -70,7 +70,7 @@ Proyek mengikuti **Clean Architecture** dengan **Hexagonal Architecture** patter
 
 ### Layer Details
 
-#### 📌 **Interfaces Layer** (Presentation/API)
+#### **Interfaces Layer** (Presentation/API)
 ```
 ├── rest/
 │   ├── ProductController.java          # REST endpoints
@@ -85,7 +85,7 @@ Proyek mengikuti **Clean Architecture** dengan **Hexagonal Architecture** patter
 │       └── GlobalExceptionHandler.java # Centralized error handling
 ```
 
-#### 📌 **Application Layer** (Business Logic Orchestration)
+#### **Application Layer** (Business Logic Orchestration)
 ```
 ├── service/
 │   └── ProductService.java             # Use-case implementation
@@ -93,7 +93,7 @@ Proyek mengikuti **Clean Architecture** dengan **Hexagonal Architecture** patter
     └── ProductRepository.java          # Port interface (abstraction)
 ```
 
-#### 📌 **Domain Layer** (Core Business)
+#### **Domain Layer** (Core Business)
 ```
 ├── entity/
 │   └── Product.java                    # Business entity (Record/Sealed)
@@ -105,7 +105,7 @@ Proyek mengikuti **Clean Architecture** dengan **Hexagonal Architecture** patter
     └── ProductRepository.java          # Port interface definition
 ```
 
-#### 📌 **Infrastructure Layer** (Persistence)
+#### **Infrastructure Layer** (Persistence)
 ```
 ├── adapter/
 │   ├── InMemoryProductRepository.java  # In-memory implementation
@@ -114,7 +114,7 @@ Proyek mengikuti **Clean Architecture** dengan **Hexagonal Architecture** patter
 
 ---
 
-## ✨ Fitur Utama
+## Fitur Utama
 
 ### 1. **CRUD Operasi Produk**
 - ✅ **Create**: Membuat produk baru dengan validasi
@@ -149,7 +149,7 @@ Proyek mengikuti **Clean Architecture** dengan **Hexagonal Architecture** patter
 
 ---
 
-## 📦 Struktur Proyek
+## Struktur Proyek
 
 ```
 portfolio-enterprise/
@@ -226,7 +226,7 @@ portfolio-enterprise/
 
 ---
 
-## 🛠️ Setup & Menjalankan Aplikasi
+## Setup & Menjalankan Aplikasi
 
 ### Prasyarat
 
@@ -260,10 +260,10 @@ mvn clean install
 ```
 
 Perintah ini akan:
-- ✅ Download dependencies
-- ✅ Compile source code
-- ✅ Run unit tests
-- ✅ Package aplikasi
+- Download dependencies
+- Compile source code
+- Run unit tests
+- Package aplikasi
 
 #### 4. Jalankan Aplikasi
 
@@ -299,7 +299,7 @@ Aplikasi akan berjalan di **http://localhost:8080**
 
 ---
 
-## 🧪 API Endpoints
+## API Endpoints
 
 ### Endpoints Overview
 
@@ -318,7 +318,7 @@ Aplikasi akan berjalan di **http://localhost:8080**
 
 ### Detailed Endpoints
 
-#### ✅ POST /api/products - Create Product
+#### POST /api/products - Create Product
 
 **Request:**
 ```bash
@@ -373,7 +373,7 @@ curl -X POST http://localhost:8080/api/products \
 
 ---
 
-#### ✅ GET /api/products - Get All Products
+#### GET /api/products - Get All Products
 
 **Request:**
 ```bash
@@ -404,7 +404,7 @@ curl http://localhost:8080/api/products
 
 ---
 
-#### ✅ GET /api/products/{id} - Get Product by ID
+#### GET /api/products/{id} - Get Product by ID
 
 **Request:**
 ```bash
@@ -436,7 +436,7 @@ curl http://localhost:8080/api/products/550e8400-e29b-41d4-a716-446655440000
 
 ---
 
-#### ✅ PUT /api/products/{id} - Update Product
+#### PUT /api/products/{id} - Update Product
 
 **Request:**
 ```bash
@@ -464,7 +464,7 @@ curl -X PUT http://localhost:8080/api/products/550e8400-e29b-41d4-a716-446655440
 
 ---
 
-#### ✅ DELETE /api/products/{id} - Delete Product
+#### DELETE /api/products/{id} - Delete Product
 
 **Request:**
 ```bash
@@ -478,7 +478,7 @@ curl -X DELETE http://localhost:8080/api/products/550e8400-e29b-41d4-a716-446655
 
 ---
 
-#### ✅ GET /api/products/search - Search Products
+#### GET /api/products/search - Search Products
 
 **Request (Case-Insensitive):**
 ```bash
@@ -501,7 +501,7 @@ curl "http://localhost:8080/api/products/search?name=laptop"
 
 ---
 
-#### ✅ PATCH /api/products/{id}/stock - Adjust Stock
+#### PATCH /api/products/{id}/stock - Adjust Stock
 
 **Request (Increase Stock by 10):**
 ```bash
@@ -538,7 +538,7 @@ curl -X PATCH "http://localhost:8080/api/products/550e8400-e29b-41d4-a716-446655
 
 ---
 
-#### ✅ GET /api/health - Health Check
+#### GET /api/health - Health Check
 
 **Request:**
 ```bash
@@ -560,7 +560,7 @@ curl http://localhost:8080/api/health
 
 ---
 
-## 🧪 Testing
+## Testing
 
 ### Menjalankan Tests
 
@@ -702,7 +702,7 @@ mvn test jacoco:report
 
 ---
 
-## 🔄 CI/CD Pipeline
+## CI/CD Pipeline
 
 ### GitHub Actions Workflow
 
@@ -762,8 +762,8 @@ jobs:
 ### Pipeline Workflow
 
 Pipeline dijalankan secara otomatis pada:
-- ✅ Push ke branch `main` atau `develop`
-- ✅ Pull request ke branch `main` atau `develop`
+- Push ke branch `main` atau `develop`
+- Pull request ke branch `main` atau `develop`
 
 **Tahapan Pipeline:**
 1. **Checkout** - Clone kode dari repository
@@ -913,13 +913,13 @@ public record ErrorResponse(
 
 ---
 
-## 🎯 Best Practices
+## Best Practices
 
 ### 1. **Clean Architecture**
-- ✅ Separation of concerns (layers)
-- ✅ Domain-driven design
-- ✅ No framework dependencies in domain layer
-- ✅ Dependency inversion (interfaces for abstraction)
+- Separation of concerns (layers)
+- Domain-driven design
+- No framework dependencies in domain layer
+- Dependency inversion (interfaces for abstraction)
 
 ### 2. **SOLID Principles**
 
@@ -974,10 +974,10 @@ public sealed interface DomainException
 ```
 
 ### 6. **Testability**
-- ✅ Dependency injection untuk mock dependencies
-- ✅ Separation of concerns untuk isolated testing
-- ✅ No static methods atau singletons
-- ✅ Constructor injection (tidak field injection)
+- Dependency injection untuk mock dependencies
+- Separation of concerns untuk isolated testing
+- No static methods atau singletons
+- Constructor injection (tidak field injection)
 
 ### 7. **Logging Best Practices**
 ```java
@@ -1000,7 +1000,7 @@ public class ProductService {
 
 ---
 
-## 🧑‍💻 Catatan Developer
+## Catatan Developer
 
 ### Membuat Fitur Baru
 
@@ -1097,11 +1097,11 @@ executor.submit(() -> {
 
 ### Konvensi Coding
 
-- ✅ **Naming**: PascalCase untuk classes, camelCase untuk methods/variables
-- ✅ **Javadoc**: Document public APIs
-- ✅ **Error Messages**: Clear, actionable error messages
-- ✅ **Comments**: Explain "why", not "what"
-- ✅ **Constants**: Use UPPER_SNAKE_CASE
+- **Naming**: PascalCase untuk classes, camelCase untuk methods/variables
+- **Javadoc**: Document public APIs
+- **Error Messages**: Clear, actionable error messages
+- **Comments**: Explain "why", not "what"
+- **Constants**: Use UPPER_SNAKE_CASE
 
 ### Database Migration (Future Enhancement)
 
@@ -1134,7 +1134,7 @@ public interface JpaProductRepository extends JpaRepository<ProductEntity, UUID>
 
 ---
 
-## 📝 Pom.xml Dependencies
+## Pom.xml Dependencies
 
 ```xml
 <dependencies>
@@ -1179,7 +1179,7 @@ public interface JpaProductRepository extends JpaRepository<ProductEntity, UUID>
 
 ---
 
-## 📚 Referensi & Resources
+## Referensi & Resources
 
 - [Clean Architecture by Robert C. Martin](https://blog.cleancoder.com/uncle-bob/2012/08/13/the-clean-architecture.html)
 - [Spring Boot Documentation](https://spring.io/projects/spring-boot)
@@ -1189,36 +1189,33 @@ public interface JpaProductRepository extends JpaRepository<ProductEntity, UUID>
 
 ---
 
-## 📄 Lisensi
+## Lisensi
 
 Proyek ini dibuat untuk keperluan **portfolio** mendemonstrasikan:
 
-✅ Clean Architecture & Hexagonal Architecture  
-✅ SOLID Principles Implementation  
-✅ Design Patterns (Repository, Service, DTO, Adapter)  
-✅ Spring Boot 3.4 Best Practices  
-✅ Java 21 Modern Features  
-✅ Unit & Integration Testing  
-✅ CI/CD Pipeline dengan GitHub Actions  
-✅ Input Validation & Error Handling  
-✅ RESTful API Design  
+ Clean Architecture & Hexagonal Architecture  
+ SOLID Principles Implementation  
+ Design Patterns (Repository, Service, DTO, Adapter)  
+ Spring Boot 3.4 Best Practices  
+ Java 21 Modern Features  
+ Unit & Integration Testing  
+ CI/CD Pipeline dengan GitHub Actions  
+ Input Validation & Error Handling  
+ RESTful API Design  
 
 ---
 
-## 👨‍💼 Author
+## Author
 
 Dibangun oleh **Senior Java Developer & Spring Boot Architect** sebagai portofolio enterprise-grade.
 
 ---
 
-## 💬 Support & Kontribusi
+## Support & Kontribusi
 
 Untuk pertanyaan atau issues:
 1. Buat issue di GitHub repository
 2. Kirim email ke developer
 3. Hubungi melalui LinkedIn
 
-**Repository**: https://github.com/yourusername/portfolio-enterprise  
-**Last Updated**: January 2024  
-**Java Version**: 21+  
-**Spring Boot Version**: 3.4+
+**Repository**: https://github.com/nareswara353-ux/Project-Java
