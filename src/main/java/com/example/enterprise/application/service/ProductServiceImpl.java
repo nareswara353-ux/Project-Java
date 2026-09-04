@@ -42,6 +42,11 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
+    public List<Product> searchProducts(String namePart) {
+        return productRepository.findByNameContaining(namePart);
+    }
+
+    @Override
     public void deleteProduct(UUID id) {
         if (!productRepository.existsById(id)) {
             throw new IllegalArgumentException("Product not found with id: " + id);
