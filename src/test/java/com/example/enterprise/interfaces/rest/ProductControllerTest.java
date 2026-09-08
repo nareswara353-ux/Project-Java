@@ -15,8 +15,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import java.util.List;
 import java.util.UUID;
 
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -34,7 +33,6 @@ class ProductControllerTest {
     @MockitoBean
     private ProductService productService;
 
-    // Mock required beans for validation context
     @MockitoBean
     private ProductRepository productRepository;
 
@@ -44,8 +42,8 @@ class ProductControllerTest {
         UUID id = UUID.randomUUID();
         Product product = new Product(id, "Laptop", 999.99, 5);
 
-        when(productService.createProduct(any(), anyDouble(), anyInt())).thenReturn(product);
-        // Mock repository for validator to avoid duplicate check interference
+        when(productService.createProduct(anyString(), anyDouble(), anyInt())).thenReturn(product);
+        // Mock repository to avoid duplicate check interference
         when(productRepository.findByNameContaining("Laptop")).thenReturn(List.of());
 
         mockMvc.perform(post("/api/products")
@@ -64,8 +62,7 @@ class ProductControllerTest {
         ProductRequest request = new ProductRequest("Updated Laptop", 899.99, 3);
         Product updated = new Product(id, "Updated Laptop", 899.99, 3);
 
-        when(productService.updateProduct(eq(id), any(), anyDouble(), anyInt())).thenReturn(updated);
-        // Mock repository to avoid duplicate check during update
+        when(productService.updateProduct(eq(id), anyString(), anyDouble(), anyInt())).thenReturn(updated);
         when(productRepository.findByNameContaining("Updated Laptop")).thenReturn(List.of());
 
         mockMvc.perform(put("/api/products/{id}", id)
