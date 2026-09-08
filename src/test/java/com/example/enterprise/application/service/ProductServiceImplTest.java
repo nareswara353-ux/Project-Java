@@ -1,5 +1,6 @@
 package com.example.enterprise.application.service;
 
+import com.example.enterprise.application.port.EventPublisher;
 import com.example.enterprise.domain.Product;
 import com.example.enterprise.domain.port.ProductRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -23,6 +24,9 @@ class ProductServiceImplTest {
     @Mock
     private ProductRepository productRepository;
 
+    @Mock
+    private EventPublisher eventPublisher;  // ← mock event publisher
+
     @InjectMocks
     private ProductServiceImpl productService;
 
@@ -38,12 +42,14 @@ class ProductServiceImplTest {
     @Test
     void createProduct_ShouldSaveAndReturnProduct() {
         when(productRepository.save(any(Product.class))).thenReturn(testProduct);
+        doNothing().when(eventPublisher).publish(any()); // ← no-op untuk event
 
         Product result = productService.createProduct("Test Product", 99.99, 10);
 
         assertNotNull(result);
         assertEquals(testProduct, result);
         verify(productRepository, times(1)).save(any(Product.class));
+        verify(eventPublisher, times(1)).publish(any()); // pastikan event dipublish
     }
 
     @Test
@@ -51,6 +57,7 @@ class ProductServiceImplTest {
         Product updated = new Product(productId, "Updated Product", 49.99, 5);
         when(productRepository.findById(productId)).thenReturn(Optional.of(testProduct));
         when(productRepository.save(any(Product.class))).thenReturn(updated);
+        doNothing().when(eventPublisher).publish(any());
 
         Product result = productService.updateProduct(productId, "Updated Product", 49.99, 5);
 
@@ -60,6 +67,7 @@ class ProductServiceImplTest {
         assertEquals(5, result.stock());
         verify(productRepository, times(1)).findById(productId);
         verify(productRepository, times(1)).save(any(Product.class));
+        verify(eventPublisher, times(1)).publish(any());
     }
 
     @Test
@@ -69,6 +77,7 @@ class ProductServiceImplTest {
         assertThrows(IllegalArgumentException.class,
                 () -> productService.updateProduct(productId, "Any", 10.0, 1));
         verify(productRepository, never()).save(any(Product.class));
+        verify(eventPublisher, never()).publish(any());
     }
 
     @Test
@@ -101,20 +110,23 @@ class ProductServiceImplTest {
 
     @Test
     void deleteProduct_WhenExists_ShouldDelete() {
-        when(productRepository.existsById(productId)).thenReturn(true);
+        when(productRepository.findById(productId)).thenReturn(Optional.of(testProduct));
         doNothing().when(productRepository).deleteById(productId);
+        doNothing().when(eventPublisher).publish(any());
 
         assertDoesNotThrow(() -> productService.deleteProduct(productId));
         verify(productRepository, times(1)).deleteById(productId);
+        verify(eventPublisher, times(1)).publish(any());
     }
 
     @Test
     void deleteProduct_WhenNotFound_ShouldThrowException() {
-        when(productRepository.existsById(productId)).thenReturn(false);
+        when(productRepository.findById(productId)).thenReturn(Optional.empty());
 
         assertThrows(IllegalArgumentException.class,
                 () -> productService.deleteProduct(productId));
         verify(productRepository, never()).deleteById(any());
+        verify(eventPublisher, never()).publish(any());
     }
 
     @Test
@@ -122,11 +134,13 @@ class ProductServiceImplTest {
         when(productRepository.findById(productId)).thenReturn(Optional.of(testProduct));
         Product adjusted = new Product(productId, "Test Product", 99.99, 15);
         when(productRepository.save(any(Product.class))).thenReturn(adjusted);
+        doNothing().when(eventPublisher).publish(any());
 
         Product result = productService.adjustStock(productId, 5);
 
         assertEquals(15, result.stock());
         verify(productRepository, times(1)).save(any(Product.class));
+        verify(eventPublisher, times(1)).publish(any());
     }
 
     @Test
@@ -136,5 +150,6 @@ class ProductServiceImplTest {
         assertThrows(IllegalArgumentException.class,
                 () -> productService.adjustStock(productId, -20));
         verify(productRepository, never()).save(any(Product.class));
+        verify(eventPublisher, never()).publish(any());
     }
 }
