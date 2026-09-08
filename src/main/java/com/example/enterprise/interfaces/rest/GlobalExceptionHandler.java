@@ -1,5 +1,6 @@
 package com.example.enterprise.interfaces.rest;
 
+import com.example.enterprise.domain.exception.DuplicateProductException;
 import com.example.enterprise.domain.exception.ProductNotFoundException;
 import com.example.enterprise.interfaces.rest.dto.ErrorResponse;
 import org.springframework.http.HttpStatus;
@@ -22,11 +23,22 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ErrorResponse> handleProductNotFound(ProductNotFoundException ex) {
         ErrorResponse error = new ErrorResponse(
                 Instant.now(),
-                HttpStatus.NOT_FOUND.value(),
+                HttpStatus.NOT_FOUND.value(),           // 404
                 HttpStatus.NOT_FOUND.getReasonPhrase(),
                 ex.getMessage()
         );
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(error);
+    }
+
+    @ExceptionHandler(DuplicateProductException.class)
+    public ResponseEntity<ErrorResponse> handleDuplicateProduct(DuplicateProductException ex) {
+        ErrorResponse error = new ErrorResponse(
+                Instant.now(),
+                HttpStatus.CONFLICT.value(),            // 409
+                HttpStatus.CONFLICT.getReasonPhrase(),
+                ex.getMessage()
+        );
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(error);
     }
 
     @ExceptionHandler(IllegalArgumentException.class)
