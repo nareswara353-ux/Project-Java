@@ -2,6 +2,7 @@ package com.example.enterprise.interfaces.rest;
 
 import com.example.enterprise.application.port.ProductService;
 import com.example.enterprise.domain.Product;
+import com.example.enterprise.domain.port.ProductRepository;
 import com.example.enterprise.interfaces.rest.dto.ProductRequest;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
@@ -33,6 +34,10 @@ class ProductControllerTest {
     @MockitoBean
     private ProductService productService;
 
+    // Mock required beans for validation context
+    @MockitoBean
+    private ProductRepository productRepository;
+
     @Test
     void createProduct_ShouldReturnCreated() throws Exception {
         ProductRequest request = new ProductRequest("Laptop", 999.99, 5);
@@ -40,6 +45,8 @@ class ProductControllerTest {
         Product product = new Product(id, "Laptop", 999.99, 5);
 
         when(productService.createProduct(any(), anyDouble(), anyInt())).thenReturn(product);
+        // Mock repository for validator to avoid duplicate check interference
+        when(productRepository.findByNameContaining("Laptop")).thenReturn(List.of());
 
         mockMvc.perform(post("/api/products")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -58,6 +65,8 @@ class ProductControllerTest {
         Product updated = new Product(id, "Updated Laptop", 899.99, 3);
 
         when(productService.updateProduct(eq(id), any(), anyDouble(), anyInt())).thenReturn(updated);
+        // Mock repository to avoid duplicate check during update
+        when(productRepository.findByNameContaining("Updated Laptop")).thenReturn(List.of());
 
         mockMvc.perform(put("/api/products/{id}", id)
                         .contentType(MediaType.APPLICATION_JSON)
