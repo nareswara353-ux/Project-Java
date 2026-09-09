@@ -27,13 +27,13 @@ public class ProductRepositoryAdapter implements ProductRepository {
     @Override
     public Optional<Product> findById(UUID id) {
         return jpaProductRepository.findById(id)
-                .map(ProductEntity::toDomain);
+                .map(entity -> entity.toDomain());
     }
 
     @Override
     public List<Product> findAll() {
         return jpaProductRepository.findAll().stream()
-                .map(ProductEntity::toDomain)
+                .map(entity -> entity.toDomain())
                 .collect(Collectors.toList());
     }
 
@@ -43,7 +43,7 @@ public class ProductRepositoryAdapter implements ProductRepository {
             return findAll();
         }
         return jpaProductRepository.findByNameContainingIgnoreCase(namePart).stream()
-                .map(ProductEntity::toDomain)
+                .map(entity -> entity.toDomain())
                 .collect(Collectors.toList());
     }
 
