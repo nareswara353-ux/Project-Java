@@ -13,7 +13,6 @@ public class ProductEventListener {
     public void handleProductEvent(ProductEvent event) {
         log.info("Received product event: {}", event.getClass().getSimpleName());
 
-        // Pattern matching dengan Java 21 preview
         switch (event) {
             case ProductEvent.ProductCreated created ->
                 log.info("Product created: {} (ID: {}, Price: {}, Stock: {})",

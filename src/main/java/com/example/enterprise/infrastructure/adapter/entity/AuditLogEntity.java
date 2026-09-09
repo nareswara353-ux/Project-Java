@@ -23,7 +23,7 @@ public class AuditLogEntity {
     private UUID id;
 
     @Column(nullable = false)
-    private String action; // CREATED, UPDATED, DELETED, STOCK_ADJUSTED
+    private String action;
 
     @Column(nullable = false)
     private UUID productId;
@@ -32,9 +32,9 @@ public class AuditLogEntity {
     private String productName;
 
     @Column(columnDefinition = "TEXT")
-    private String details; // JSON atau string detail perubahan
+    private String details;
 
-    private String user; // bisa diambil dari SecurityContext nanti
+    private String user;
 
     @CreationTimestamp
     @Column(nullable = false, updatable = false)
