@@ -6,53 +6,56 @@ import com.example.enterprise.infrastructure.adapter.entity.AuditLogEntity;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
 
 @Component
 @RequiredArgsConstructor
 @Slf4j
 public class AuditLogAdapter implements AuditLogPort {
 
-    private final AuditLogRepository auditLogRepository;
+    private final AuditLogJpaRepository auditLogJpaRepository;
 
     @Override
-    @Transactional
     public void logCreated(Product product, String user) {
-        saveLog("CREATED", product, null, user, null);
+        saveLog("CREATED", product,
+                String.format("Product '%s' created with price=%.2f, stock=%d",
+                        product.name(), product.price(), product.stock()),
+                user);
     }
 
     @Override
-    @Transactional
     public void logUpdated(Product product, Product oldProduct, String user) {
-        String details = String.format("Old: price=%.2f, stock=%d | New: price=%.2f, stock=%d",
-                oldProduct.price(), oldProduct.stock(),
-                product.price(), product.stock());
-        saveLog("UPDATED", product, user, details, null);
+        saveLog("UPDATED", product,
+                String.format("Product updated from [name=%s, price=%.2f, stock=%d] to [name=%s, price=%.2f, stock=%d]",
+                        oldProduct.name(), oldProduct.price(), oldProduct.stock(),
+                        product.name(), product.price(), product.stock()),
+                user);
     }
 
     @Override
-    @Transactional
     public void logDeleted(Product product, String user) {
-        saveLog("DELETED", product, user, "Product deleted", null);
+        saveLog("DELETED", product,
+                String.format("Product '%s' deleted (price=%.2f, stock=%d)",
+                        product.name(), product.price(), product.stock()),
+                user);
     }
 
     @Override
-    @Transactional
     public void logStockAdjusted(Product product, int oldStock, int newStock, String user) {
-        String details = String.format("Stock adjusted: %d → %d (delta: %d)",
-                oldStock, newStock, newStock - oldStock);
-        saveLog("STOCK_ADJUSTED", product, user, details, null);
+        saveLog("STOCK_ADJUSTED", product,
+                String.format("Stock adjusted from %d to %d (delta=%d)",
+                        oldStock, newStock, newStock - oldStock),
+                user);
     }
 
-    private void saveLog(String action, Product product, String user, String details, String unused) {
+    private void saveLog(String action, Product product, String details, String user) {
         AuditLogEntity entity = AuditLogEntity.builder()
                 .action(action)
                 .productId(product.id())
                 .productName(product.name())
+                .details(details)
                 .user(user != null ? user : "system")
-                .details(details != null ? details : "")
                 .build();
-        auditLogRepository.save(entity);
+        auditLogJpaRepository.save(entity);
         log.debug("Audit log saved: {} for product {}", action, product.id());
     }
 }
