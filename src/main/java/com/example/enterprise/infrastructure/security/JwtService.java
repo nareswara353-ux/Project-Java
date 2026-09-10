@@ -81,6 +81,14 @@ public class JwtService {
         return Set.of();
     }
 
+    public long extractExpirationMillis(String token) {
+        Date expiration = parseClaims(token).getExpiration();
+        if (expiration == null) {
+            return 0L;
+        }
+        return Math.max(0L, expiration.getTime() - System.currentTimeMillis());
+    }
+
     public boolean isAccessToken(String token) {
         Object type = parseClaims(token).get(CLAIM_TYPE);
         return TYPE_ACCESS.equals(type);
