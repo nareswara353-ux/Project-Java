@@ -2,8 +2,8 @@ package com.example.enterprise;
 
 import com.example.enterprise.infrastructure.adapter.AuditLogJpaRepository;
 import com.example.enterprise.infrastructure.adapter.JpaProductRepository;
-import com.example.enterprise.interfaces.rest.dto.AuditLogResponse;
-import com.example.enterprise.interfaces.rest.dto.PageResponse;
+import com.example.enterprise.interfaces.rest.dto.AuthResponse;
+import com.example.enterprise.interfaces.rest.dto.LoginRequest;
 import com.example.enterprise.interfaces.rest.dto.ProductRequest;
 import com.example.enterprise.interfaces.rest.dto.ProductResponse;
 import org.junit.jupiter.api.BeforeAll;
@@ -15,10 +15,11 @@ import org.junit.jupiter.api.TestMethodOrder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
-import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 
 import java.util.UUID;
@@ -39,17 +40,35 @@ class EnterpriseApplicationIntegrationTest {
     @Autowired
     private AuditLogJpaRepository auditLogJpaRepository;
 
+    private String adminToken;
     private UUID createdProductId;
 
     @BeforeAll
-    void cleanDatabaseOnce() {
+    void initOnce() {
         auditLogJpaRepository.deleteAll();
         jpaProductRepository.deleteAll();
+        adminToken = login("admin", "admin123");
     }
 
-    /**
-     * Mencetak response ke stdout jika status 4xx/5xx agar root cause terlihat di CI.
-     */
+    private String login(String username, String password) {
+        ResponseEntity<AuthResponse> response = restTemplate.postForEntity(
+                "/api/auth/login",
+                new LoginRequest(username, password),
+                AuthResponse.class);
+
+        if (response.getStatusCode() != HttpStatus.OK || response.getBody() == null) {
+            throw new IllegalStateException("Login failed for user " + username + ": " + response.getStatusCode());
+        }
+        return response.getBody().accessToken();
+    }
+
+    private HttpHeaders authHeaders() {
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        headers.setBearerAuth(adminToken);
+        return headers;
+    }
+
     private <T> void dumpIfError(ResponseEntity<T> response, String label) {
         if (response.getStatusCode().isError()) {
             System.out.println("=========================================================");
@@ -72,8 +91,11 @@ class EnterpriseApplicationIntegrationTest {
     @Order(2)
     void createProduct_ShouldPersistAndReturnCreated() {
         ProductRequest request = new ProductRequest("Integration Test Product", 149.99, 7);
-        ResponseEntity<ProductResponse> response = restTemplate.postForEntity(
-                "/api/products", request, ProductResponse.class);
+        ResponseEntity<ProductResponse> response = restTemplate.exchange(
+                "/api/products",
+                HttpMethod.POST,
+                new HttpEntity<>(request, authHeaders()),
+                ProductResponse.class);
         dumpIfError(response, "POST /api/products");
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CREATED);
@@ -85,8 +107,11 @@ class EnterpriseApplicationIntegrationTest {
     @Test
     @Order(3)
     void getProductById_ShouldReturnPersistedProduct() {
-        ResponseEntity<ProductResponse> response = restTemplate.getForEntity(
-                "/api/products/" + createdProductId, ProductResponse.class);
+        ResponseEntity<ProductResponse> response = restTemplate.exchange(
+                "/api/products/" + createdProductId,
+                HttpMethod.GET,
+                new HttpEntity<>(authHeaders()),
+                ProductResponse.class);
         dumpIfError(response, "GET /api/products/" + createdProductId);
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
@@ -99,7 +124,9 @@ class EnterpriseApplicationIntegrationTest {
     void adjustStock_ShouldUpdatePersistedStock() {
         ResponseEntity<ProductResponse> response = restTemplate.exchange(
                 "/api/products/" + createdProductId + "/stock?delta=5",
-                HttpMethod.PATCH, null, ProductResponse.class);
+                HttpMethod.PATCH,
+                new HttpEntity<>(authHeaders()),
+                ProductResponse.class);
         dumpIfError(response, "PATCH /api/products/" + createdProductId + "/stock");
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
@@ -110,8 +137,11 @@ class EnterpriseApplicationIntegrationTest {
     @Test
     @Order(5)
     void searchProducts_ShouldFindByName() {
-        ResponseEntity<ProductResponse[]> response = restTemplate.getForEntity(
-                "/api/products/search?name=Integration", ProductResponse[].class);
+        ResponseEntity<ProductResponse[]> response = restTemplate.exchange(
+                "/api/products/search?name=Integration",
+                HttpMethod.GET,
+                new HttpEntity<>(authHeaders()),
+                ProductResponse[].class);
         dumpIfError(response, "GET /api/products/search");
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
@@ -122,15 +152,15 @@ class EnterpriseApplicationIntegrationTest {
     @Test
     @Order(6)
     void auditLogs_ShouldContainEntriesForCreatedProduct() {
-        ResponseEntity<PageResponse<AuditLogResponse>> response = restTemplate.exchange(
+        ResponseEntity<String> response = restTemplate.exchange(
                 "/api/audit-logs/product/" + createdProductId,
-                HttpMethod.GET, null,
-                new ParameterizedTypeReference<>() {});
+                HttpMethod.GET,
+                new HttpEntity<>(authHeaders()),
+                String.class);
         dumpIfError(response, "GET /api/audit-logs/product/" + createdProductId);
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
-        assertThat(response.getBody()).isNotNull();
-        assertThat(response.getBody().content()).isNotEmpty();
+        assertThat(response.getBody()).contains("CREATED");
     }
 
     @Test
@@ -138,7 +168,9 @@ class EnterpriseApplicationIntegrationTest {
     void deleteProduct_ShouldReturnNoContent() {
         ResponseEntity<Void> response = restTemplate.exchange(
                 "/api/products/" + createdProductId,
-                HttpMethod.DELETE, null, Void.class);
+                HttpMethod.DELETE,
+                new HttpEntity<>(authHeaders()),
+                Void.class);
         dumpIfError(response, "DELETE /api/products/" + createdProductId);
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NO_CONTENT);
@@ -147,8 +179,11 @@ class EnterpriseApplicationIntegrationTest {
     @Test
     @Order(8)
     void getDeletedProduct_ShouldReturnNotFound() {
-        ResponseEntity<String> response = restTemplate.getForEntity(
-                "/api/products/" + createdProductId, String.class);
+        ResponseEntity<String> response = restTemplate.exchange(
+                "/api/products/" + createdProductId,
+                HttpMethod.GET,
+                new HttpEntity<>(authHeaders()),
+                String.class);
         dumpIfError(response, "GET (deleted) /api/products/" + createdProductId);
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
@@ -158,14 +193,26 @@ class EnterpriseApplicationIntegrationTest {
     @Order(9)
     void createProduct_WithDuplicateName_ShouldReturnConflictOrBadRequest() {
         ProductRequest request = new ProductRequest("Duplicate Product", 10.00, 1);
-        restTemplate.postForEntity("/api/products", request, ProductResponse.class);
-
-        ResponseEntity<String> response = restTemplate.postForEntity(
+        restTemplate.exchange(
                 "/api/products",
-                new HttpEntity<>(new ProductRequest("Duplicate Product", 20.00, 2)),
+                HttpMethod.POST,
+                new HttpEntity<>(request, authHeaders()),
+                ProductResponse.class);
+
+        ResponseEntity<String> response = restTemplate.exchange(
+                "/api/products",
+                HttpMethod.POST,
+                new HttpEntity<>(new ProductRequest("Duplicate Product", 20.00, 2), authHeaders()),
                 String.class);
         dumpIfError(response, "POST /api/products (duplicate)");
 
         assertThat(response.getStatusCode().is4xxClientError()).isTrue();
+    }
+
+    @Test
+    @Order(10)
+    void protectedEndpoint_WithoutToken_ShouldReturnUnauthorized() {
+        ResponseEntity<String> response = restTemplate.getForEntity("/api/products", String.class);
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.UNAUTHORIZED);
     }
 }
