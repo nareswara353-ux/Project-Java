@@ -2,6 +2,7 @@ package com.example.enterprise.application.service;
 
 import com.example.enterprise.application.port.EventPublisher;
 import com.example.enterprise.domain.Product;
+import com.example.enterprise.domain.exception.ProductNotFoundException;
 import com.example.enterprise.domain.port.ProductRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -25,7 +26,7 @@ class ProductServiceImplTest {
     private ProductRepository productRepository;
 
     @Mock
-    private EventPublisher eventPublisher;  // ← mock event publisher
+    private EventPublisher eventPublisher;
 
     @InjectMocks
     private ProductServiceImpl productService;
@@ -42,14 +43,14 @@ class ProductServiceImplTest {
     @Test
     void createProduct_ShouldSaveAndReturnProduct() {
         when(productRepository.save(any(Product.class))).thenReturn(testProduct);
-        doNothing().when(eventPublisher).publish(any()); // ← no-op untuk event
+        doNothing().when(eventPublisher).publish(any());
 
         Product result = productService.createProduct("Test Product", 99.99, 10);
 
         assertNotNull(result);
         assertEquals(testProduct, result);
         verify(productRepository, times(1)).save(any(Product.class));
-        verify(eventPublisher, times(1)).publish(any()); // pastikan event dipublish
+        verify(eventPublisher, times(1)).publish(any());
     }
 
     @Test
@@ -71,10 +72,10 @@ class ProductServiceImplTest {
     }
 
     @Test
-    void updateProduct_WhenNotFound_ShouldThrowException() {
+    void updateProduct_WhenNotFound_ShouldThrowProductNotFoundException() {
         when(productRepository.findById(productId)).thenReturn(Optional.empty());
 
-        assertThrows(IllegalArgumentException.class,
+        assertThrows(ProductNotFoundException.class,
                 () -> productService.updateProduct(productId, "Any", 10.0, 1));
         verify(productRepository, never()).save(any(Product.class));
         verify(eventPublisher, never()).publish(any());
@@ -91,10 +92,10 @@ class ProductServiceImplTest {
     }
 
     @Test
-    void getProductById_WhenNotFound_ShouldThrowException() {
+    void getProductById_WhenNotFound_ShouldThrowProductNotFoundException() {
         when(productRepository.findById(productId)).thenReturn(Optional.empty());
 
-        assertThrows(IllegalArgumentException.class,
+        assertThrows(ProductNotFoundException.class,
                 () -> productService.getProductById(productId));
     }
 
@@ -120,10 +121,10 @@ class ProductServiceImplTest {
     }
 
     @Test
-    void deleteProduct_WhenNotFound_ShouldThrowException() {
+    void deleteProduct_WhenNotFound_ShouldThrowProductNotFoundException() {
         when(productRepository.findById(productId)).thenReturn(Optional.empty());
 
-        assertThrows(IllegalArgumentException.class,
+        assertThrows(ProductNotFoundException.class,
                 () -> productService.deleteProduct(productId));
         verify(productRepository, never()).deleteById(any());
         verify(eventPublisher, never()).publish(any());
