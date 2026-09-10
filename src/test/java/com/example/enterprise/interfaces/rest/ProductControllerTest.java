@@ -47,7 +47,7 @@ class ProductControllerTest {
         when(productService.createProduct(anyString(), anyDouble(), anyInt())).thenReturn(product);
         when(productRepository.findByNameContaining("Laptop")).thenReturn(List.of());
 
-        mockMvc.perform(post("/products")
+        mockMvc.perform(post("/api/products")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isCreated())
@@ -66,7 +66,7 @@ class ProductControllerTest {
         when(productService.updateProduct(eq(id), anyString(), anyDouble(), anyInt())).thenReturn(updated);
         when(productRepository.findByNameContaining("Updated Laptop")).thenReturn(List.of());
 
-        mockMvc.perform(put("/products/{id}", id)
+        mockMvc.perform(put("/api/products/{id}", id)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
@@ -80,7 +80,7 @@ class ProductControllerTest {
 
         when(productService.getProductById(id)).thenReturn(product);
 
-        mockMvc.perform(get("/products/{id}", id))
+        mockMvc.perform(get("/api/products/{id}", id))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(id.toString()))
                 .andExpect(jsonPath("$.name").value("Monitor"));
@@ -97,7 +97,7 @@ class ProductControllerTest {
 
         when(productService.getAllProducts()).thenReturn(products);
 
-        mockMvc.perform(get("/products"))
+        mockMvc.perform(get("/api/products"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.length()").value(2))
                 .andExpect(jsonPath("$[0].name").value("A"))
@@ -108,7 +108,7 @@ class ProductControllerTest {
     void deleteProduct_ShouldReturnNoContent() throws Exception {
         UUID id = UUID.randomUUID();
 
-        mockMvc.perform(delete("/products/{id}", id))
+        mockMvc.perform(delete("/api/products/{id}", id))
                 .andExpect(status().isNoContent());
     }
 
@@ -119,7 +119,7 @@ class ProductControllerTest {
 
         when(productService.adjustStock(eq(id), eq(2))).thenReturn(adjusted);
 
-        mockMvc.perform(patch("/products/{id}/stock", id)
+        mockMvc.perform(patch("/api/products/{id}/stock", id)
                         .param("delta", "2"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.stock").value(12));
@@ -132,7 +132,7 @@ class ProductControllerTest {
 
         when(productService.searchProducts("Phone")).thenReturn(results);
 
-        mockMvc.perform(get("/products/search").param("name", "Phone"))
+        mockMvc.perform(get("/api/products/search").param("name", "Phone"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.length()").value(1))
                 .andExpect(jsonPath("$[0].name").value("Phone"));
