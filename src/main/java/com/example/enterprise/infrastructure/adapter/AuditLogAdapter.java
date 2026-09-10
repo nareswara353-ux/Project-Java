@@ -53,7 +53,7 @@ public class AuditLogAdapter implements AuditLogPort {
                 .productId(product.id())
                 .productName(product.name())
                 .details(details)
-                .user(user != null ? user : "system")
+                .actor(user != null ? user : "system")
                 .build();
         auditLogJpaRepository.save(entity);
         log.debug("Audit log saved: {} for product {}", action, product.id());
