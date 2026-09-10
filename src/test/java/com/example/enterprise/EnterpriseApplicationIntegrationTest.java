@@ -6,10 +6,11 @@ import com.example.enterprise.interfaces.rest.dto.AuditLogResponse;
 import com.example.enterprise.interfaces.rest.dto.PageResponse;
 import com.example.enterprise.interfaces.rest.dto.ProductRequest;
 import com.example.enterprise.interfaces.rest.dto.ProductResponse;
-import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.api.TestMethodOrder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -26,6 +27,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class EnterpriseApplicationIntegrationTest {
 
     @Autowired
@@ -37,11 +39,12 @@ class EnterpriseApplicationIntegrationTest {
     @Autowired
     private AuditLogJpaRepository auditLogJpaRepository;
 
-    private static UUID createdProductId;
+    private UUID createdProductId;
 
-    @BeforeEach
-    void cleanDatabase() {
-        // Hapus semua data sebelum setiap test agar tidak ada sisa dari test sebelumnya.
+    @BeforeAll
+    void cleanDatabaseOnce() {
+        // Bersihkan sekali di awal saja; jangan diulang tiap test
+        // karena test dirancang berurutan (state dibawa antar test).
         auditLogJpaRepository.deleteAll();
         jpaProductRepository.deleteAll();
     }
@@ -72,8 +75,6 @@ class EnterpriseApplicationIntegrationTest {
     @Test
     @Order(3)
     void getProductById_ShouldReturnPersistedProduct() {
-        // Karena database sudah dibersihkan, kita perlu membuat produk terlebih dahulu.
-        // Namun karena test diurutkan (@Order), createdProductId dari test #2 sudah ada.
         ResponseEntity<ProductResponse> response = restTemplate.getForEntity(
                 "/api/products/" + createdProductId, ProductResponse.class);
 
@@ -116,7 +117,6 @@ class EnterpriseApplicationIntegrationTest {
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(response.getBody()).isNotNull();
-        // Sekarang AuditLogPort asli digunakan, jadi tabel audit log akan terisi.
         assertThat(response.getBody().content()).isNotEmpty();
         assertThat(response.getBody().content())
                 .extracting(AuditLogResponse::action)
@@ -145,11 +145,9 @@ class EnterpriseApplicationIntegrationTest {
     @Test
     @Order(9)
     void createProduct_WithDuplicateName_ShouldReturnConflictOrBadRequest() {
-        // Buat produk dengan nama "Duplicate Product"
         ProductRequest request = new ProductRequest("Duplicate Product", 10.00, 1);
         restTemplate.postForEntity("/api/products", request, ProductResponse.class);
 
-        // Coba buat lagi dengan nama yang sama
         ResponseEntity<String> response = restTemplate.postForEntity(
                 "/api/products",
                 new HttpEntity<>(new ProductRequest("Duplicate Product", 20.00, 2)),
