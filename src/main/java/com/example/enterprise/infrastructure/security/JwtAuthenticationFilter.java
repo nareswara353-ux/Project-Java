@@ -35,6 +35,9 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                                     @NonNull FilterChain filterChain) throws ServletException, IOException {
 
         String header = request.getHeader(HEADER);
+        log.debug("JWT filter: {} {} | Authorization header present: {}",
+                request.getMethod(), request.getRequestURI(), header != null);
+
         if (header == null || !header.startsWith(PREFIX)) {
             filterChain.doFilter(request, response);
             return;
@@ -43,11 +46,14 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         String token = header.substring(PREFIX.length()).trim();
         try {
             if (!jwtService.isAccessToken(token)) {
+                log.debug("JWT filter: token is not an access token, skipping auth");
                 filterChain.doFilter(request, response);
                 return;
             }
 
             String username = jwtService.extractUsername(token);
+            log.debug("JWT filter: extracted username = {}", username);
+
             if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
                 Set<Role> roles = jwtService.extractRoles(token);
                 List<SimpleGrantedAuthority> authorities = roles.stream()
@@ -59,6 +65,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                         new UsernamePasswordAuthenticationToken(username, null, authorities);
                 authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
                 SecurityContextHolder.getContext().setAuthentication(authentication);
+                log.debug("JWT filter: authentication set for {} with authorities {}", username, authorities);
             }
         } catch (Exception ex) {
             log.warn("Cannot set authentication from JWT: {}", ex.getMessage());
