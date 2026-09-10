@@ -3,6 +3,8 @@ package com.example.enterprise.interfaces.rest;
 import com.example.enterprise.application.port.ProductService;
 import com.example.enterprise.domain.Product;
 import com.example.enterprise.domain.port.ProductRepository;
+import com.example.enterprise.domain.port.UserRepository;
+import com.example.enterprise.infrastructure.security.JwtService;
 import com.example.enterprise.interfaces.rest.dto.ProductRequest;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
@@ -37,6 +39,12 @@ class ProductControllerTest {
 
     @MockitoBean
     private ProductRepository productRepository;
+
+    @MockitoBean
+    private JwtService jwtService;
+
+    @MockitoBean
+    private UserRepository userRepository;
 
     @Test
     void createProduct_ShouldReturnCreated() throws Exception {
