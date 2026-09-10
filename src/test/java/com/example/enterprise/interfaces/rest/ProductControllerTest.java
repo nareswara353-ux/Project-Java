@@ -7,6 +7,7 @@ import com.example.enterprise.interfaces.rest.dto.ProductRequest;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
@@ -22,6 +23,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(ProductController.class)
+@AutoConfigureMockMvc(addFilters = false)
 class ProductControllerTest {
 
     @Autowired
@@ -43,10 +45,9 @@ class ProductControllerTest {
         Product product = new Product(id, "Laptop", 999.99, 5);
 
         when(productService.createProduct(anyString(), anyDouble(), anyInt())).thenReturn(product);
-        // Mock repository to avoid duplicate check interference
         when(productRepository.findByNameContaining("Laptop")).thenReturn(List.of());
 
-        mockMvc.perform(post("/api/products")
+        mockMvc.perform(post("/products")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isCreated())
@@ -65,7 +66,7 @@ class ProductControllerTest {
         when(productService.updateProduct(eq(id), anyString(), anyDouble(), anyInt())).thenReturn(updated);
         when(productRepository.findByNameContaining("Updated Laptop")).thenReturn(List.of());
 
-        mockMvc.perform(put("/api/products/{id}", id)
+        mockMvc.perform(put("/products/{id}", id)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
@@ -79,7 +80,7 @@ class ProductControllerTest {
 
         when(productService.getProductById(id)).thenReturn(product);
 
-        mockMvc.perform(get("/api/products/{id}", id))
+        mockMvc.perform(get("/products/{id}", id))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(id.toString()))
                 .andExpect(jsonPath("$.name").value("Monitor"));
@@ -96,7 +97,7 @@ class ProductControllerTest {
 
         when(productService.getAllProducts()).thenReturn(products);
 
-        mockMvc.perform(get("/api/products"))
+        mockMvc.perform(get("/products"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.length()").value(2))
                 .andExpect(jsonPath("$[0].name").value("A"))
@@ -107,7 +108,7 @@ class ProductControllerTest {
     void deleteProduct_ShouldReturnNoContent() throws Exception {
         UUID id = UUID.randomUUID();
 
-        mockMvc.perform(delete("/api/products/{id}", id))
+        mockMvc.perform(delete("/products/{id}", id))
                 .andExpect(status().isNoContent());
     }
 
@@ -118,7 +119,7 @@ class ProductControllerTest {
 
         when(productService.adjustStock(eq(id), eq(2))).thenReturn(adjusted);
 
-        mockMvc.perform(patch("/api/products/{id}/stock", id)
+        mockMvc.perform(patch("/products/{id}/stock", id)
                         .param("delta", "2"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.stock").value(12));
@@ -131,7 +132,7 @@ class ProductControllerTest {
 
         when(productService.searchProducts("Phone")).thenReturn(results);
 
-        mockMvc.perform(get("/api/products/search?name=Phone"))
+        mockMvc.perform(get("/products/search").param("name", "Phone"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.length()").value(1))
                 .andExpect(jsonPath("$[0].name").value("Phone"));
