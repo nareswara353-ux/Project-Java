@@ -23,7 +23,7 @@ public class AuditLogEntity {
     private UUID id;
 
     @Column(nullable = false)
-    private String action; // CREATED, UPDATED, DELETED, STOCK_ADJUSTED
+    private String action;
 
     @Column(nullable = false)
     private UUID productId;
@@ -35,7 +35,7 @@ public class AuditLogEntity {
     private String details;
 
     @Column(name = "actor", nullable = false)
-    private String actor; // rename dari 'user' karena reserved keyword H2
+    private String actor;
 
     @CreationTimestamp
     @Column(nullable = false, updatable = false)
