@@ -4,6 +4,7 @@ import com.example.enterprise.application.port.EventPublisher;
 import com.example.enterprise.application.port.ProductService;
 import com.example.enterprise.domain.Product;
 import com.example.enterprise.domain.event.ProductEvent;
+import com.example.enterprise.domain.exception.ProductNotFoundException;
 import com.example.enterprise.domain.port.ProductRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -32,7 +33,7 @@ public class ProductServiceImpl implements ProductService {
     @Override
     public Product updateProduct(UUID id, String name, double price, int stock) {
         Product existing = productRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Product not found with id: " + id));
+                .orElseThrow(() -> new ProductNotFoundException(id));
         Product updated = new Product(existing.id(), name, price, stock);
         Product saved = productRepository.save(updated);
         eventPublisher.publish(new ProductEvent.ProductUpdated(saved, existing));
@@ -42,7 +43,7 @@ public class ProductServiceImpl implements ProductService {
     @Override
     public Product getProductById(UUID id) {
         return productRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Product not found with id: " + id));
+                .orElseThrow(() -> new ProductNotFoundException(id));
     }
 
     @Override
@@ -58,7 +59,7 @@ public class ProductServiceImpl implements ProductService {
     @Override
     public void deleteProduct(UUID id) {
         Product product = productRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Product not found with id: " + id));
+                .orElseThrow(() -> new ProductNotFoundException(id));
         productRepository.deleteById(id);
         eventPublisher.publish(new ProductEvent.ProductDeleted(id, product));
     }
