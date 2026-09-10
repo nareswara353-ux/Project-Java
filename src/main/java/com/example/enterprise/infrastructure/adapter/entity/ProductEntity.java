@@ -18,8 +18,13 @@ import java.util.UUID;
 public class ProductEntity {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
+    @Column(nullable = false, updatable = false)
     private UUID id;
+
+    @Version
+    @Column(nullable = false)
+    @Builder.Default
+    private Long version = 0L;
 
     @Column(nullable = false, unique = true, length = 100)
     private String name;
