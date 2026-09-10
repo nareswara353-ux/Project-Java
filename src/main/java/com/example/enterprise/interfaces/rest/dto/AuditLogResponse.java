@@ -11,7 +11,7 @@ public record AuditLogResponse(
         UUID productId,
         String productName,
         String details,
-        String user,
+        String actor,
         Instant timestamp
 ) {
     public static AuditLogResponse fromEntity(AuditLogEntity entity) {
@@ -21,7 +21,7 @@ public record AuditLogResponse(
                 entity.getProductId(),
                 entity.getProductName(),
                 entity.getDetails(),
-                entity.getUser(),
+                entity.getActor(),
                 entity.getTimestamp()
         );
     }
