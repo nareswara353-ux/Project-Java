@@ -29,6 +29,7 @@
         <jjwt.version>0.12.6</jjwt.version>
         <jacoco.version>0.8.12</jacoco.version>
         <spotbugs.version>4.8.6.6</spotbugs.version>
+        <findsecbugs.version>1.13.0</findsecbugs.version>
         <jacoco.line.coverage.min>0.70</jacoco.line.coverage.min>
     </properties>
 
@@ -209,9 +210,9 @@
                     <excludeFilterFile>${project.basedir}/spotbugs/spotbugs-exclude.xml</excludeFilterFile>
                     <plugins>
                         <plugin>
-                            <groupId>com.hmb</groupId>
+                            <groupId>com.h3xstream.findsecbugs</groupId>
                             <artifactId>findsecbugs-plugin</artifactId>
-                            <version>1.13.0</version>
+                            <version>${findsecbugs.version}</version>
                         </plugin>
                     </plugins>
                 </configuration>

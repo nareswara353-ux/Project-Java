@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<FindBugsFilter>
+    <Match>
+        <Class name="~.*\.dto\..*"/>
+    </Match>
+    <Match>
+        <Class name="~.*\.entity\..*"/>
+    </Match>
+    <Match>
+        <Class name="~.*\.exception\..*"/>
+    </Match>
+    <Match>
+        <Class name="~.*\.event\..*"/>
+    </Match>
+    <Match>
+        <Class name="~.*\.config\..*"/>
+    </Match>
+    <Match>
+        <Class name="com.example.enterprise.EnterpriseApplication"/>
+    </Match>
+    <Match>
+        <Bug pattern="EI_EXPOSE_REP"/>
+    </Match>
+    <Match>
+        <Bug pattern="EI_EXPOSE_REP2"/>
+    </Match>
+    <Match>
+        <Bug pattern="CT_CONSTRUCTOR_THROW"/>
+    </Match>
+    <Match>
+        <Bug pattern="MS_PKGPROTECT"/>
+    </Match>
+    <Match>
+        <Bug pattern="URF_UNREAD_FIELD"/>
+    </Match>
+</FindBugsFilter>
