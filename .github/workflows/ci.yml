@@ -21,11 +21,29 @@ jobs:
           distribution: 'temurin'
           cache: maven
 
-      - name: Build, test, and verify code quality
+      - name: Build, test, and verify quality gates
         run: mvn clean verify --batch-mode --no-transfer-progress
 
-      - name: Upload build artifact (JAR)
+      - name: Upload application JAR
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: java-enterprise-portfolio-jar
           path: target/*.jar
+          if-no-files-found: ignore
+
+      - name: Upload JaCoCo coverage report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: jacoco-coverage-report
+          path: target/site/jacoco/
+          if-no-files-found: ignore
+
+      - name: Upload SpotBugs report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: spotbugs-report
+          path: target/spotbugsXml.xml
+          if-no-files-found: ignore
