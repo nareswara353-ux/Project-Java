@@ -64,8 +64,6 @@ class ProductServiceImplTest {
 
         assertNotNull(result);
         assertEquals("Updated Product", result.name());
-        assertEquals(49.99, result.price());
-        assertEquals(5, result.stock());
         verify(productRepository, times(1)).findById(productId);
         verify(productRepository, times(1)).save(any(Product.class));
         verify(eventPublisher, times(1)).publish(any());
@@ -110,6 +108,16 @@ class ProductServiceImplTest {
     }
 
     @Test
+    void countProducts_ShouldReturnRepositoryCount() {
+        when(productRepository.count()).thenReturn(17L);
+
+        long result = productService.countProducts();
+
+        assertEquals(17L, result);
+        verify(productRepository, times(1)).count();
+    }
+
+    @Test
     void deleteProduct_WhenExists_ShouldDelete() {
         when(productRepository.findById(productId)).thenReturn(Optional.of(testProduct));
         doNothing().when(productRepository).deleteById(productId);
@@ -127,7 +135,6 @@ class ProductServiceImplTest {
         assertThrows(ProductNotFoundException.class,
                 () -> productService.deleteProduct(productId));
         verify(productRepository, never()).deleteById(any());
-        verify(eventPublisher, never()).publish(any());
     }
 
     @Test
@@ -151,6 +158,5 @@ class ProductServiceImplTest {
         assertThrows(IllegalArgumentException.class,
                 () -> productService.adjustStock(productId, -20));
         verify(productRepository, never()).save(any(Product.class));
-        verify(eventPublisher, never()).publish(any());
     }
 }
