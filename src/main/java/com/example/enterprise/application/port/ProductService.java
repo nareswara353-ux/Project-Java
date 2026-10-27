@@ -11,6 +11,7 @@ public interface ProductService {
     Product getProductById(UUID id);
     List<Product> getAllProducts();
     List<Product> searchProducts(String namePart);
+    long countProducts();
     void deleteProduct(UUID id);
     Product adjustStock(UUID id, int delta);
 }

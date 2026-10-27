@@ -11,6 +11,7 @@ public interface ProductRepository {
     Optional<Product> findById(UUID id);
     List<Product> findAll();
     List<Product> findByNameContaining(String namePart);
+    long count();
     void deleteById(UUID id);
     boolean existsById(UUID id);
 }

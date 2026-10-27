@@ -11,6 +11,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -67,6 +68,11 @@ public class ProductController {
                 .map(ProductResponse::fromDomain)
                 .collect(Collectors.toList());
         return ResponseEntity.ok(responses);
+    }
+
+    @GetMapping("/count")
+    public ResponseEntity<Map<String, Long>> countProducts() {
+        return ResponseEntity.ok(Map.of("count", productService.countProducts()));
     }
 
     @DeleteMapping("/{id}")

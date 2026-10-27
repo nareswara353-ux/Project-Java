@@ -57,6 +57,11 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
+    public long countProducts() {
+        return productRepository.count();
+    }
+
+    @Override
     public void deleteProduct(UUID id) {
         Product product = productRepository.findById(id)
                 .orElseThrow(() -> new ProductNotFoundException(id));

@@ -48,6 +48,11 @@ public class ProductRepositoryAdapter implements ProductRepository {
     }
 
     @Override
+    public long count() {
+        return jpaProductRepository.count();
+    }
+
+    @Override
     public void deleteById(UUID id) {
         jpaProductRepository.deleteById(id);
     }
