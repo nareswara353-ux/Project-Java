@@ -7,11 +7,17 @@ import com.example.enterprise.domain.event.ProductEvent;
 import com.example.enterprise.domain.exception.ProductNotFoundException;
 import com.example.enterprise.domain.port.ProductRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.UUID;
+
+import static com.example.enterprise.config.CacheConfig.PRODUCTS_CACHE;
+import static com.example.enterprise.config.CacheConfig.PRODUCT_SEARCH_CACHE;
 
 @Service
 @RequiredArgsConstructor
@@ -22,6 +28,10 @@ public class ProductServiceImpl implements ProductService {
     private final EventPublisher eventPublisher;
 
     @Override
+    @Caching(evict = {
+            @CacheEvict(value = PRODUCTS_CACHE, allEntries = true),
+            @CacheEvict(value = PRODUCT_SEARCH_CACHE, allEntries = true)
+    })
     public Product createProduct(String name, double price, int stock) {
         UUID id = UUID.randomUUID();
         Product product = new Product(id, name, price, stock);
@@ -31,6 +41,10 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
+    @Caching(evict = {
+            @CacheEvict(value = PRODUCTS_CACHE, allEntries = true),
+            @CacheEvict(value = PRODUCT_SEARCH_CACHE, allEntries = true)
+    })
     public Product updateProduct(UUID id, String name, double price, int stock) {
         Product existing = productRepository.findById(id)
                 .orElseThrow(() -> new ProductNotFoundException(id));
@@ -41,6 +55,7 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
+    @Cacheable(value = PRODUCTS_CACHE, key = "#id")
     public Product getProductById(UUID id) {
         return productRepository.findById(id)
                 .orElseThrow(() -> new ProductNotFoundException(id));
@@ -52,6 +67,7 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
+    @Cacheable(value = PRODUCT_SEARCH_CACHE, key = "#namePart == null ? 'ALL' : #namePart.toLowerCase()")
     public List<Product> searchProducts(String namePart) {
         return productRepository.findByNameContaining(namePart);
     }
@@ -62,6 +78,10 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
+    @Caching(evict = {
+            @CacheEvict(value = PRODUCTS_CACHE, allEntries = true),
+            @CacheEvict(value = PRODUCT_SEARCH_CACHE, allEntries = true)
+    })
     public void deleteProduct(UUID id) {
         Product product = productRepository.findById(id)
                 .orElseThrow(() -> new ProductNotFoundException(id));
@@ -70,6 +90,10 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
+    @Caching(evict = {
+            @CacheEvict(value = PRODUCTS_CACHE, allEntries = true),
+            @CacheEvict(value = PRODUCT_SEARCH_CACHE, allEntries = true)
+    })
     public Product adjustStock(UUID id, int delta) {
         Product product = getProductById(id);
         int oldStock = product.stock();
