@@ -5,6 +5,7 @@ import com.example.enterprise.domain.event.ProductEvent;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.event.EventListener;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -14,48 +15,40 @@ public class ProductEventListener {
 
     private final AuditLogPort auditLogPort;
 
+    @Async
     @EventListener
     public void handleProductEvent(ProductEvent event) {
-        log.info("Received product event: {}", event.getClass().getSimpleName());
+        log.info("Received product event: {} on thread {}",
+                event.getClass().getSimpleName(), Thread.currentThread());
 
         switch (event) {
             case ProductEvent.ProductCreated created -> {
-                log.info("Product created: {} (ID: {}, Price: {}, Stock: {})",
+                log.info("Product created: {} (ID: {})",
                         created.productSnapshot().name(),
-                        created.productId(),
-                        created.productSnapshot().price(),
-                        created.productSnapshot().stock());
+                        created.productId());
                 auditLogPort.logCreated(created.productSnapshot(), "system");
             }
 
             case ProductEvent.ProductUpdated updated -> {
-                log.info("Product updated: {} (ID: {}) | Old: Price={}, Stock={} | New: Price={}, Stock={}",
+                log.info("Product updated: {} (ID: {})",
                         updated.productSnapshot().name(),
-                        updated.productId(),
-                        updated.oldProduct().price(),
-                        updated.oldProduct().stock(),
-                        updated.productSnapshot().price(),
-                        updated.productSnapshot().stock());
+                        updated.productId());
                 auditLogPort.logUpdated(updated.productSnapshot(), updated.oldProduct(), "system");
             }
 
             case ProductEvent.ProductDeleted deleted -> {
-                log.info("Product deleted: {} (ID: {}) - Deleted product: {}, Price: {}, Stock: {}",
+                log.info("Product deleted: {} (ID: {})",
                         deleted.product().name(),
-                        deleted.productId(),
-                        deleted.productSnapshot().name(),
-                        deleted.productSnapshot().price(),
-                        deleted.productSnapshot().stock());
+                        deleted.productId());
                 auditLogPort.logDeleted(deleted.productSnapshot(), "system");
             }
 
             case ProductEvent.ProductStockAdjusted adjusted -> {
-                log.info("Product stock adjusted: {} (ID: {}) | Old stock: {}, New stock: {}, Delta: {}",
+                log.info("Product stock adjusted: {} (ID: {}) | {} -> {}",
                         adjusted.productSnapshot().name(),
                         adjusted.productId(),
                         adjusted.oldStock(),
-                        adjusted.newStock(),
-                        adjusted.newStock() - adjusted.oldStock());
+                        adjusted.newStock());
                 auditLogPort.logStockAdjusted(
                         adjusted.productSnapshot(),
                         adjusted.oldStock(),
