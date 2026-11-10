@@ -6,6 +6,7 @@ import com.example.enterprise.domain.Product;
 import com.example.enterprise.domain.event.ProductEvent;
 import com.example.enterprise.domain.exception.ProductNotFoundException;
 import com.example.enterprise.domain.port.ProductRepository;
+import com.example.enterprise.infrastructure.metrics.ProductMetrics;
 import lombok.RequiredArgsConstructor;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
@@ -26,6 +27,7 @@ public class ProductServiceImpl implements ProductService {
 
     private final ProductRepository productRepository;
     private final EventPublisher eventPublisher;
+    private final ProductMetrics productMetrics;
 
     @Override
     @Caching(evict = {
@@ -36,6 +38,7 @@ public class ProductServiceImpl implements ProductService {
         UUID id = UUID.randomUUID();
         Product product = new Product(id, name, price, stock);
         Product saved = productRepository.save(product);
+        productMetrics.recordCreate();
         eventPublisher.publish(new ProductEvent.ProductCreated(saved));
         return saved;
     }
@@ -50,6 +53,7 @@ public class ProductServiceImpl implements ProductService {
                 .orElseThrow(() -> new ProductNotFoundException(id));
         Product updated = new Product(existing.id(), name, price, stock);
         Product saved = productRepository.save(updated);
+        productMetrics.recordUpdate();
         eventPublisher.publish(new ProductEvent.ProductUpdated(saved, existing));
         return saved;
     }
@@ -86,6 +90,7 @@ public class ProductServiceImpl implements ProductService {
         Product product = productRepository.findById(id)
                 .orElseThrow(() -> new ProductNotFoundException(id));
         productRepository.deleteById(id);
+        productMetrics.recordDelete();
         eventPublisher.publish(new ProductEvent.ProductDeleted(id, product));
     }
 
