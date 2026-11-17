@@ -1,0 +1,28 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: java-enterprise-portfolio
+  namespace: java-enterprise-portfolio
+  labels:
+    app.kubernetes.io/name: java-enterprise-portfolio
+  annotations:
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/proxy-body-size: "10m"
+    cert-manager.io/cluster-issuer: "letsencrypt-prod"
+spec:
+  ingressClassName: nginx
+  tls:
+    - hosts:
+        - portfolio.example.com
+      secretName: portfolio-tls
+  rules:
+    - host: portfolio.example.com
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: java-enterprise-portfolio
+                port:
+                  name: http
