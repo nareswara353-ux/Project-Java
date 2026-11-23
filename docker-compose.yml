@@ -38,6 +38,7 @@ services:
       - "--storage.tsdb.path=/prometheus"
       - "--storage.tsdb.retention.time=15d"
       - "--web.enable-lifecycle"
+      - "--web.enable-remote-write-receiver"
     depends_on:
       - app
       - alertmanager
@@ -94,6 +95,23 @@ services:
     networks:
       - monitoring
 
+  tempo:
+    image: grafana/tempo:2.6.1
+    container_name: portfolio-tempo
+    ports:
+      - "3200:3200"
+      - "4317:4317"
+      - "4318:4318"
+    volumes:
+      - ./monitoring/tempo/tempo-config.yml:/etc/tempo/tempo-config.yml:ro
+      - tempo-data:/var/tempo
+    command: -config.file=/etc/tempo/tempo-config.yml
+    depends_on:
+      - prometheus
+    restart: unless-stopped
+    networks:
+      - monitoring
+
   grafana:
     image: grafana/grafana:11.3.0
     container_name: portfolio-grafana
@@ -112,6 +130,7 @@ services:
     depends_on:
       - prometheus
       - loki
+      - tempo
     restart: unless-stopped
     networks:
       - monitoring
@@ -125,4 +144,5 @@ volumes:
   alertmanager-data:
   loki-data:
   promtail-positions:
+  tempo-data:
   grafana-data:
