@@ -7,6 +7,7 @@ import java.util.UUID;
 
 public interface ProductService {
     Product createProduct(String name, double price, int stock);
+    List<Product> createProductsBulk(List<CreateCommand> commands);
     Product updateProduct(UUID id, String name, double price, int stock);
     Product getProductById(UUID id);
     List<Product> getAllProducts();
@@ -14,4 +15,6 @@ public interface ProductService {
     long countProducts();
     void deleteProduct(UUID id);
     Product adjustStock(UUID id, int delta);
+
+    record CreateCommand(String name, double price, int stock) {}
 }

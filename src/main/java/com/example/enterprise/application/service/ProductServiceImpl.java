@@ -43,6 +43,40 @@ public class ProductServiceImpl implements ProductService {
         return saved;
     }
 
+
+    @Override
+    @Caching(evict = {
+            @CacheEvict(value = PRODUCTS_CACHE, allEntries = true),
+            @CacheEvict(value = PRODUCT_SEARCH_CACHE, allEntries = true)
+    })
+    public java.util.List<Product> createProductsBulk(java.util.List<CreateCommand> commands) {
+        if (commands == null || commands.isEmpty()) {
+            throw new IllegalArgumentException("Bulk request cannot be empty");
+        }
+        if (commands.size() > 100) {
+            throw new IllegalArgumentException("Bulk request cannot exceed 100 items");
+        }
+
+        java.util.Set<String> seen = new java.util.HashSet<>();
+        for (CreateCommand cmd : commands) {
+            String lower = cmd.name().toLowerCase();
+            if (!seen.add(lower)) {
+                throw new IllegalArgumentException("Duplicate product name in batch: " + cmd.name());
+            }
+        }
+
+        java.util.List<Product> results = new java.util.ArrayList<>(commands.size());
+        for (CreateCommand cmd : commands) {
+            UUID id = UUID.randomUUID();
+            Product product = new Product(id, cmd.name(), cmd.price(), cmd.stock());
+            Product saved = productRepository.save(product);
+            productMetrics.recordCreate();
+            eventPublisher.publish(new ProductEvent.ProductCreated(saved));
+            results.add(saved);
+        }
+        return results;
+    }
+
     @Override
     @Caching(evict = {
             @CacheEvict(value = PRODUCTS_CACHE, allEntries = true),

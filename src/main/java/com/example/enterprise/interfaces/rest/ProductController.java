@@ -2,6 +2,7 @@ package com.example.enterprise.interfaces.rest;
 
 import com.example.enterprise.application.port.ProductService;
 import com.example.enterprise.domain.Product;
+import com.example.enterprise.interfaces.rest.dto.ProductBulkRequest;
 import com.example.enterprise.interfaces.rest.dto.ProductRequest;
 import com.example.enterprise.interfaces.rest.dto.ProductResponse;
 import jakarta.validation.Valid;
@@ -31,6 +32,21 @@ public class ProductController {
         );
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(ProductResponse.fromDomain(product));
+    }
+
+
+    @PostMapping("/bulk")
+    @org.springframework.security.access.prepost.PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<List<ProductResponse>> createProductsBulk(
+            @Valid @RequestBody ProductBulkRequest request) {
+        List<ProductService.CreateCommand> commands = request.items().stream()
+                .map(r -> new ProductService.CreateCommand(r.name(), r.price(), r.stock()))
+                .toList();
+        List<Product> products = productService.createProductsBulk(commands);
+        List<ProductResponse> responses = products.stream()
+                .map(ProductResponse::fromDomain)
+                .toList();
+        return ResponseEntity.status(HttpStatus.CREATED).body(responses);
     }
 
     @PutMapping("/{id}")
