@@ -9,6 +9,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -34,9 +35,8 @@ public class ProductController {
                 .body(ProductResponse.fromDomain(product));
     }
 
-
     @PostMapping("/bulk")
-    @org.springframework.security.access.prepost.PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<List<ProductResponse>> createProductsBulk(
             @Valid @RequestBody ProductBulkRequest request) {
         List<ProductService.CreateCommand> commands = request.items().stream()
@@ -95,6 +95,13 @@ public class ProductController {
     public ResponseEntity<Void> deleteProduct(@PathVariable UUID id) {
         productService.deleteProduct(id);
         return ResponseEntity.noContent().build();
+    }
+
+    @PostMapping("/{id}/restore")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<ProductResponse> restoreProduct(@PathVariable UUID id) {
+        Product product = productService.restoreProduct(id);
+        return ResponseEntity.ok(ProductResponse.fromDomain(product));
     }
 
     @PatchMapping("/{id}/stock")

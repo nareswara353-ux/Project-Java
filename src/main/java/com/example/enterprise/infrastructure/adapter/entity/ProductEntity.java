@@ -1,12 +1,17 @@
 package com.example.enterprise.infrastructure.adapter.entity;
 
 import com.example.enterprise.domain.Product;
-import jakarta.persistence.*;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
+import jakarta.persistence.Version;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.Instant;
 import java.util.UUID;
 
 @Entity
@@ -34,6 +39,13 @@ public class ProductEntity {
 
     @Column(nullable = false)
     private int stock;
+
+    @Column(nullable = false)
+    @Builder.Default
+    private boolean deleted = false;
+
+    @Column(name = "deleted_at")
+    private Instant deletedAt;
 
     public static ProductEntity fromDomain(Product product) {
         return ProductEntity.builder()

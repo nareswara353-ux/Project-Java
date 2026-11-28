@@ -14,6 +14,7 @@ public interface ProductService {
     List<Product> searchProducts(String namePart);
     long countProducts();
     void deleteProduct(UUID id);
+    Product restoreProduct(UUID id);
     Product adjustStock(UUID id, int delta);
 
     record CreateCommand(String name, double price, int stock) {}

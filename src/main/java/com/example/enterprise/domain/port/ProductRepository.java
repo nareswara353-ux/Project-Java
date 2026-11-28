@@ -9,9 +9,11 @@ import java.util.UUID;
 public interface ProductRepository {
     Product save(Product product);
     Optional<Product> findById(UUID id);
+    Optional<Product> findByIdIncludingDeleted(UUID id);
     List<Product> findAll();
     List<Product> findByNameContaining(String namePart);
     long count();
     void deleteById(UUID id);
+    void restoreById(UUID id);
     boolean existsById(UUID id);
 }

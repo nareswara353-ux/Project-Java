@@ -128,6 +128,20 @@ public class ProductServiceImpl implements ProductService {
         eventPublisher.publish(new ProductEvent.ProductDeleted(id, product));
     }
 
+
+    @Override
+    @Caching(evict = {
+            @CacheEvict(value = PRODUCTS_CACHE, allEntries = true),
+            @CacheEvict(value = PRODUCT_SEARCH_CACHE, allEntries = true)
+    })
+    public Product restoreProduct(UUID id) {
+        Product existing = productRepository.findByIdIncludingDeleted(id)
+                .orElseThrow(() -> new ProductNotFoundException(id));
+        productRepository.restoreById(id);
+        return productRepository.findById(id)
+                .orElseThrow(() -> new IllegalStateException("Restored product not found: " + id));
+    }
+
     @Override
     @Caching(evict = {
             @CacheEvict(value = PRODUCTS_CACHE, allEntries = true),
